@@ -74,7 +74,7 @@ select
   *
 from 
   world_bank_data.wdi_country
-limit 10
+limit 5
 """)
 
 ```
