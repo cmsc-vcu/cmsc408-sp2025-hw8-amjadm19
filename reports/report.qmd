@@ -10,7 +10,7 @@ In this assignment we used alot of sql tools to filter through data and create t
 
 
 ```{python}
-from helpers import create_database_engine, run_sql_and_return_df, run_sql_and_return_html, create_db_wrapper, execute_ddl_from_file, execute_ddl
+from helpers import create_database_engine, run_sql_and_return_html, run_sql_and_return_html, create_db_wrapper, execute_ddl_from_file, execute_ddl
 
 # Load these variables from .env file.
 config_map = {
@@ -28,7 +28,7 @@ cnx,config = create_db_wrapper( config_map )
 ```{python}
 # Do a quick test of the connection and trap the errors better!
 
-run_sql_and_return_df(cnx,"""
+run_sql_and_return_html(cnx,"""
 select
   table_schema, table_name, table_rows
 from
@@ -51,7 +51,7 @@ How many records are in the country table?
 # How many records are in the world_bank_data.wdi_country table?
 # (skills: select, aggregate)
 
-run_sql_and_return_df(cnx,"""
+run_sql_and_return_html(cnx,"""
 select
   count(*) as "Row Count"
 from
@@ -69,7 +69,7 @@ Explore the first 5 records in the country table.
 ## Do you see any blanks or missing data?
 ## (skills: select, limit)
 
-run_sql_and_return_df(cnx,"""
+run_sql_and_return_html(cnx,"""
 select
   *
 from 
@@ -91,7 +91,7 @@ List all non-countries.
 ## Once you figure it out, write a query to list all the non-countries
 ## (skills: select, where)
 
-run_sql_and_return_df(cnx,"""
+run_sql_and_return_html(cnx,"""
 select 
   `Long Name`, `Region`
 from
@@ -141,7 +141,7 @@ where
 
 ```{python}
 # show number of records
-run_sql_and_return_df(cnx,"""
+run_sql_and_return_html(cnx,"""
 select count(*) from wdi_country
 """)
 ```
@@ -153,7 +153,7 @@ According to the World Bank, in 2020 there were how many countries in the world?
 ```{python}
 ## (skills: select, aggregate)
 
-run_sql_and_return_df(cnx,"""
+run_sql_and_return_html(cnx,"""
 select count(*) from wdi_country;
 """)
 
@@ -170,7 +170,7 @@ What are all unique values of region in the wdi_country table?
 ## (there are several possible ways to code this in SQL)
 ## (skills: select, aggregate, order by)
 
-run_sql_and_return_df(cnx,"""
+run_sql_and_return_html(cnx,"""
 select
   `Region`
 from
@@ -191,7 +191,7 @@ How many countries are in each region?
 ## How many countries are in each region?
 ## (skills: select, aggregate, group by, order by)
 
-run_sql_and_return_df(cnx,"""
+run_sql_and_return_html(cnx,"""
 select
   `Region` ,count(*) as "Count"
 from
@@ -212,7 +212,7 @@ List the country full names and regions for all countries in north america.
 ## List the country full names and regions for all countries in north america
 ## (skills: select, where, order by)
 
-run_sql_and_return_df(cnx,"""
+run_sql_and_return_html(cnx,"""
 select `Long Name`, `Region`
 from wdi_country
 where `Region`='North America'
@@ -227,7 +227,7 @@ where `Region`='North America'
 ## What region contains Qatar?  List the region, country short name and full name
 ## (skills: select, where)
 
-run_sql_and_return_df(cnx,"""
+run_sql_and_return_html(cnx,"""
 select `Long Name`, `Region`
 from wdi_country
 where `Short Name`='Qatar'
@@ -243,7 +243,7 @@ where `Short Name`='Qatar'
 ## where the abbr and wb_abbr are different.
 ## (skills: select, where, order by)
 
-run_sql_and_return_df(cnx,"""
+run_sql_and_return_html(cnx,"""
 select `Country Code`,`Short Name`, `2-alpha code`, `WB-2 code`, `Region`
 from wdi_country
 where
@@ -260,7 +260,7 @@ where
 ## income category in descending order of most countries to least.
 ## (skills: select, aggregate, group by, order by)
 
-run_sql_and_return_df(cnx,"""
+run_sql_and_return_html(cnx,"""
 select `Income Group` from wdi_country
 group by `Income Group`
 """)
@@ -276,7 +276,7 @@ group by `Income Group`
 ## you will be scored on the number of records returned and the value(s) 
 ## in the first column.
 
-run_sql_and_return_df(cnx,"""
+run_sql_and_return_html(cnx,"""
 select `Short Name`, `Income Group` from wdi_country
 where `Income Group` is null
 order by
@@ -306,7 +306,7 @@ commit;
 ```{python}
 ## Now, display the country again to verify the change stuck!
 
-run_sql_and_return_df(cnx,"""
+run_sql_and_return_html(cnx,"""
 select `Short Name`,`Income Group` from wdi_country
 where
   `Short Name` = 'Venezuela';
@@ -321,7 +321,7 @@ where
 ## region, income group, and no.of.countries.
 ## (skills: select, aggregate, group by, order by)
 
-run_sql_and_return_df(cnx,"""
+run_sql_and_return_html(cnx,"""
 select `Region`, `Income Group`, count(*) as "No. of Countries" from wdi_country
 group by
   `Region`,
@@ -347,7 +347,7 @@ order by
 ## and a column for the row totals.
 ## (skills: select, aggregate, group by, nested query)
 
-run_sql_and_return_df(cnx,"""
+run_sql_and_return_html(cnx,"""
 select
   `Region`,
   sum(case when `Income Group` = 'High income' then 1 else 0 end) as "High income",
@@ -379,7 +379,7 @@ order by
 ## PUT THE NUMBER FIRST! (use: count, region name, income group)
 ## (skills: select, aggregate, group by, nested query, order by, limit)
 
-run_sql_and_return_df(cnx,"""
+run_sql_and_return_html(cnx,"""
 select
   count(*) as "Low income countries", `Region`, `Income Group` from wdi_country
 where
@@ -406,7 +406,7 @@ limit
 ## the country code for the Marshall Islands is MHL.
 ## (skills: select, where, subquery)
 
-run_sql_and_return_df(cnx,"""
+run_sql_and_return_html(cnx,"""
 select
   `Country Code`,
   `Short Name`,
@@ -450,7 +450,7 @@ order by
 ## in Task 14.  (FYI - I get 6 rows in my final table.)
 ## (skills: select, where, subqueries, joins)
 
-run_sql_and_return_df(cnx,"""
+run_sql_and_return_html(cnx,"""
 with
   regs as (
     select distinct
@@ -516,7 +516,7 @@ order by
 ## slam dunk after this!
 ## (skills: select, where, subqueries, joins, aggregate functions)
 
-run_sql_and_return_df(cnx,"""
+run_sql_and_return_html(cnx,"""
 with
   base as (
     select
@@ -581,7 +581,7 @@ order by
 ## print table similar to the table in Task 15, with Income group in the
 ## columns, Region in the rows and Percent of total in each cell of the table.
 
-run_sql_and_return_df(cnx,"""
+run_sql_and_return_html(cnx,"""
 select
   `Region`,
   round(
@@ -626,7 +626,7 @@ order by
 
 ## (This is much simpler than task 20!)
 
-run_sql_and_return_df(cnx,"""
+run_sql_and_return_html(cnx,"""
 with
   base as (
     select
