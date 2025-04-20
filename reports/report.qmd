@@ -354,11 +354,11 @@ order by
 run_sql_and_return_html(cnx,"""
 select
   `Region`,
-  sum(case when `Income Group` = 'High income' then 1 else 0 end) as "High income",
-  sum(case when `Income Group` = 'Upper middle income' then 1 else 0 end) as "Upper middle income",
-  sum(case when `Income Group` = 'Lower middle income' then 1 else 0 end) as "Lower middle income",
-  sum(case when `Income Group` = 'Low income' then 1 else 0 end) as "Low income",
-  count(*) as "Row Total"
+  sum(case when `Income Group` = 'High income' then 1 else 0 end)*1.0 as "High income",
+  sum(case when `Income Group` = 'Upper middle income' then 1 else 0 end)*1.0 as "Upper middle income",
+  sum(case when `Income Group` = 'Lower middle income' then 1 else 0 end)*1.0 as "Lower middle income",
+  sum(case when `Income Group` = 'Low income' then 1 else 0 end)*1.0 as "Low income",
+  count(*)*1.0 as "Row Total"
 from
   wdi_country
 group by
@@ -628,43 +628,19 @@ order by
 ## (This is much simpler than task 20!)
 
 run_sql_and_return_html(cnx,"""
-with
-  base as (
-    select
-      `Region`,
-      `Income Group`,
-      count(*) as country_count
-    from
-      wdi_country
-    group by
-      `Region`,
-      `Income Group`
-  ),
-  income_totals as (
-    select
-      `Income Group`,
-      sum(country_count) as income_total
-    from
-      base
-    group by
-      `Income Group`
-  ),
-  grand_total as (
-    select
-      sum(income_total) as total_countries
-    from
-      income_totals
-  )
 select
-  it.`Income Group`,
-  it.income_total as "Number of Countries",
-  gt.total_countries as "Total Countries",
-  round(it.income_total / gt.total_countries * 100, 2) as "Percent of Total"
+  coalesce(`Income Group`, 'No income') as "Income Group",
+  count(*) as "Number of Countries",
+  (select count(*) from wdi_country) as "Total Countries",
+  round(
+    count(*) / (select count(*) from wdi_country) * 100
+  , 1) as "Percent of Total"
 from
-  income_totals it
-  cross join grand_total gt
+  wdi_country
+group by
+  coalesce(`Income Group`, 'No income')
 order by
-  it.income_total desc;
+  `Number of Countries` desc;
 """)
 
 ```
