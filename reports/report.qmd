@@ -93,7 +93,7 @@ List all non-countries.
 
 run_sql_and_return_html(cnx,"""
 select 
-  `Long Name`, `Region`
+  `Long Name`
 from
     world_bank_data.wdi_country
 where
@@ -228,7 +228,7 @@ where `Region`='North America'
 ## (skills: select, where)
 
 run_sql_and_return_html(cnx,"""
-select `Long Name`, `Region`
+select `Region`, `Short Name`, `Long Name`
 from wdi_country
 where `Short Name`='Qatar'
 """)
@@ -261,7 +261,7 @@ where
 ## (skills: select, aggregate, group by, order by)
 
 run_sql_and_return_html(cnx,"""
-select `Income Group` from wdi_country
+select `Income Group`, count(*) as "Count" from wdi_country
 group by `Income Group`
 """)
 
@@ -277,7 +277,9 @@ group by `Income Group`
 ## in the first column.
 
 run_sql_and_return_html(cnx,"""
-select `Short Name`, `Income Group` from wdi_country
+select `Short Name`, `Income Group`, count(*) over() as "Count"
+from 
+  wdi_country
 where `Income Group` is null
 order by
 `Short Name`;
@@ -307,7 +309,9 @@ commit;
 ## Now, display the country again to verify the change stuck!
 
 run_sql_and_return_html(cnx,"""
-select `Short Name`,`Income Group` from wdi_country
+select `Short Name`,`Income Group`, count(*) over() as "Count"
+from 
+  wdi_country
 where
   `Short Name` = 'Venezuela';
 """)
@@ -381,14 +385,18 @@ order by
 
 run_sql_and_return_html(cnx,"""
 select
-  count(*) as "Low income countries", `Region`, `Income Group` from wdi_country
+  count(*)                as "Low income countries",
+  `Region`,
+  `Income Group`
+from
+  wdi_country
 where
   `Income Group` = 'Low income'
 group by
   `Region`,
   `Income Group`
 order by
-  "Low income countries" desc
+  count(*) desc
 limit
   1;
 """)
@@ -453,16 +461,12 @@ order by
 run_sql_and_return_html(cnx,"""
 with
   regs as (
-    select distinct
-      Region
-    from
-      wdi_country
+    select distinct Region
+    from wdi_country
   ),
   incs as (
-    select distinct
-      `Income Group`
-    from
-      wdi_country
+    select distinct `Income Group`
+    from wdi_country
   ),
   combos as (
     select
@@ -485,7 +489,8 @@ with
   )
 select
   c.Region,
-  c.`Income Group`
+  c.`Income Group`,
+  coalesce(t.cnt, 0) as "Count"
 from
   combos c
   left join counts t using (Region, `Income Group`)
@@ -600,10 +605,6 @@ select
     sum(case when `Income Group` = 'Low income' then 1 else 0 end)
     / (select count(*) from wdi_country) * 100
   , 2) as "Low income",
-  round(
-    sum(case when `Income Group` is null then 1 else 0 end)
-    / (select count(*) from wdi_country) * 100
-  , 2) as "No income",
   round(
     count(*) / (select count(*) from wdi_country) * 100
   , 2) as "Row Total"
